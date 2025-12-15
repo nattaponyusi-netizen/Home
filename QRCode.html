@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ชำระเงิน - คอมบูด</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* >>> ส่วน CSS หลัก <<< */
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --muted: #cbd5e1;
+            --radius: 14px;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            --success: #4ade80; /* สีเขียวสำหรับยอดเงิน */
+            --warning: #facc15; /* สีเหลืองสำหรับปุ่มยืนยัน */
+            font-family: 'Prompt', 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.25s ease;
+        }
+
+        body {
+            margin: 0;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            
+            /* พื้นหลังเว็บไซต์: รูปภาพอนิเมะน่ารัก */
+            background: url('https://picsum.photos/seed/anime_cute/1920/1080') no-repeat center center fixed;
+            
+            background-size: cover;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); 
+            z-index: -1;
+        }
+        
+        header {
+            position: sticky; top: 0; z-index: 10;
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 32px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        /* โลโก้เป็นลิงก์ */
+        .logo { 
+            font-weight: 700; font-size: 1.4rem; color: var(--accent); 
+            text-decoration: none;
+        }
+        nav a { color: var(--muted); margin: 0 10px; text-decoration: none; font-weight: 500; border-radius: 6px; padding: 6px 12px; }
+        nav a:hover { background: var(--accent); color: white; box-shadow: 0 0 10px var(--accent-light); }
+
+        .auth-link {
+            background: #eab308; color: #1e40af; padding: 8px 15px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-left: 20px;
+        }
+        .auth-link:hover { background: #facc15; }
+
+        .btn-primary {
+             background: var(--accent); border: none; color: white; padding: 10px 18px; border-radius: 8px; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; font-weight: bold;
+         }
+         .btn-primary:hover { background: var(--accent-light); box-shadow: 0 0 14px var(--accent); transform: scale(1.05); }
+
+        footer {
+            text-align: center; color: var(--muted); padding: 20px; font-size: 0.9rem; background: rgba(15, 23, 42, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 1; margin-top: auto;
+        }
+
+        /* >>> สไตล์เฉพาะสำหรับหน้าชำระเงิน (ปรับปรุง) <<< */
+        .checkout-container {
+            flex: 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .payment-box {
+            background: linear-gradient(160deg, #1f2937, #111827); 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--accent); 
+            max-width: 680px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .payment-box h2 {
+            color: var(--accent-light);
+            margin-bottom: 25px;
+            font-size: 2rem;
+        }
+        
+        /* ยอดเงินที่ต้องชำระ */
+        .amount-display {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(var(--success), 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .amount-display span {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .payment-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .qr-section, .bank-section {
+            flex: 1;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 5px solid white;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .bank-detail strong {
+            color: var(--accent-light);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .bank-detail .account-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .bank-detail .account-number:hover {
+            color: var(--success); 
+        }
+        
+        /* สไตล์สำหรับปุ่มยืนยันการชำระเงิน (เด่นที่สุด) */
+        #confirm-button {
+            width: 100%;
+            padding: 18px;
+            margin-top: 30px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            
+            background: linear-gradient(90deg, #f59e0b, var(--warning)); 
+            color: #1f2937;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.8); 
+            transition: all 0.3s ease;
+        }
+        #confirm-button:hover {
+            background: linear-gradient(90deg, var(--warning), #f59e0b);
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.9);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="Home.html" class="logo">คอมบูด</a>
+        <nav id="main-nav">
+            <a href="Home.html">หน้าหลัก</a>
+            <a href="Start.html">ร้านค้า</a> 
+            <span id="auth-controls"></span> 
+        </nav>
+    </header>
+
+    <section class="checkout-container">
+        <div class="payment-box">
+            <h2>💰 ช่องทางการชำระเงิน (ทดสอบ)</h2>
+            <p style="color: #fca5a5; font-weight: bold;">⚠️ กรุณาโอนเงินตามยอดที่ระบุเท่านั้น</p>
+            
+            <div class="amount-display" >
+                ยอดที่ต้องชำระ: <span>1,550.00 บาท</span>
+            </div>
+
+            <div class="payment-info">
+                <div class="qr-section">
+                    <p style="text-align: center; color: var(--accent-light); font-weight: bold;">สแกน QR Code เพื่อชำระเงิน</p>
+                    
+                    <img src="https://via.placeholder.com/300x300?text=Scan+QR+Payment" alt="QR Code สำหรับชำระเงิน">
+                    </div>
+                
+                <div class="bank-section">
+                    <div class="bank-detail">
+                        <strong>ธนาคาร:</strong> K Bank (กสิกรไทย)
+                    </div>
+                    <div class="bank-detail">
+                        <strong>เลขที่บัญชี:</strong> 
+                        <span class="account-number" onclick="copyToClipboard('123-4-56789-0')">123-4-56789-0</span>
+                    </div>
+                    <div class="bank-detail">
+                        <strong>ชื่อบัญชี:</strong> นายสมชาย ใจดี
+                    </div>
+                    <div class="bank-detail">
+                        <strong>สาขา:</strong> สำนักงานใหญ่
+                    </div>
+                </div>
+            </div>
+
+            <button id="confirm-button" class="btn-primary">
+                ยืนยันการชำระเงิน / อัปโหลดหลักฐาน (เด่นชัด)
+            </button>
+        </div>
+    </section>
+
+    <footer>
+        © 2025 เว็บไซต์ตัวอย่าง • หน้าชำระเงิน
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus(); 
+
+            // 1. ฟังก์ชันคัดลอกเลขบัญชี
+            window.copyToClipboard = function(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('คัดลอกเลขบัญชี: ' + text + ' เรียบร้อยแล้ว!');
+                }).catch(err => {
+                    console.error('ไม่สามารถคัดลอกได้:', err);
+                });
+            }
+
+            // 2. จัดการปุ่มยืนยันการชำระเงิน (จำลอง)
+            const confirmButton = document.getElementById('confirm-button');
+            confirmButton.addEventListener('click', function() {
+                alert('🙏 ขอบคุณสำหรับการชำระเงิน! ระบบจะนำคุณไปยังหน้าอัปโหลดสลิป (การทำงานนี้เป็นเพียงการจำลอง)');
+            });
+        });
+
+        // โค้ดสำหรับ Header Navigation
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const authControls = document.getElementById('auth-controls');
+            
+            authControls.innerHTML = '';
+            
+            if (isLoggedIn) {
+                authControls.innerHTML = `<a href="#" class="auth-link" onclick="logout(event)">ออกจากระบบ</a>`;
+            } else {
+                authControls.innerHTML = `<a href="login.html" class="auth-link">เข้าสู่ระบบ</a>`;
+            }
+        }
+        
+        function logout(event) {
+            event.preventDefault(); 
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            alert('ออกจากระบบสำเร็จ!');
+            checkLoginStatus();
+        }
+    </script>
+</body>
+</html>
